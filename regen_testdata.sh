@@ -1,4 +1,6 @@
-# Copyright 2016 Google LLC
+#!/bin/bash -u
+#
+# Copyright 2014 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,13 +13,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-################################################################################
 
-VERB = @
+# Regenerates the expected stdout and stderr outputs for tests.
+# Args:
+#   $*: files to be updated
+files="$@"
+if [[ -z "${files}" ]]; then
+  files=tests/testdata/*.in
+fi
 
-.PHONY default:
-	$(VERB) echo "Available actions: test"
+for input in ${files}; do
+  expected_out="${input%.in}.out"
+  expected_err="${input%.in}.err"
 
-test:
-	$(VERB) bash run_all_tests.sh
+  # Run tests in a hermetic environment such that they don't break every year.
+  env YEAR=2014 \
+    bash -c "./autogen $(cat "${input}")" > "${expected_out}" 2> "${expected_err}"
+done

@@ -1,6 +1,4 @@
-#!/bin/bash -eu
-#
-# Copyright 2016 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,21 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Some tips from https://kevin.burke.dev/kevin/bazel-tests-on-travis-ci/ for
+# improving Bazel performance and minimize useless Bazel output, while adding
+# useful Bazel output, when running on Travis CI.
 #
-################################################################################
-
-set -eu
-
-source "$(dirname $0)/test_util.sh"
-
-for file in *_test.sh; do
-  echo "Running tests in ${file} ..."
-  bash "${file}" "autogen.sh" \
-      && test_record_and_print_passed "${file}" \
-      || test_record_and_print_failed "${file}"
-  echo
-done
-
-echo "Overall summary:"
-test_print_status
-test_exit
+# Note: `--batch` is only applicable for `bazel build`, not `bazel test`.
+build:ci --noshow_progress --noshow_loading_progress --verbose_failures
+test:ci --noshow_progress --noshow_loading_progress --test_output=errors --verbose_failures
